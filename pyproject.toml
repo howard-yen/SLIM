@@ -1,0 +1,30 @@
+[project]
+name = "slim"
+version = "0.1.0"
+description = "SLIM: Simple Lightweight Information Management"
+authors = [{ name = "Howard Yen", email = "hyen@cs.princeton.edu" }]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "anthropic",
+    "openai",
+    "litellm",
+    "bm25s",
+    "jax[cpu]",
+    "PyStemmer",
+    "gpt-researcher",
+    "uvicorn",
+    "fastapi",
+    "rouge-score",
+    "diskcache",
+    "crawl4ai"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
