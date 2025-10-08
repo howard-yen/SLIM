@@ -1,6 +1,6 @@
 # Lost in the Maze: Overcoming Context Limitations in Long-Horizon Agentic Search
 
----
+<!-- --- -->
 
 
 <p align="center">
@@ -12,10 +12,13 @@
     </a> -->
 </p>
 
+This repository contains the implementation of SLIM (Simple Lightweight Information Management), a powerful framework for long-horizon search agents. 
+You can find the evaluation code details here.
 
 
 ## Quick Links
 
+- [Quick Start](#quick-start)
 - [Setup](#setup)
 - [Data](#data)
 - [Running evaluation](#running-evaluation)
@@ -23,10 +26,31 @@
 - [Contacts](#contacts)
 - [Citation](#citation)
 
+## Quick Start
+
+After setting up the environment and the keys, you can use easily import SILM and use it like so:
+```python
+from slim import Slim
+
+agent = Slim(model="openai/o3")
+
+messages = [{"role": "user", "content": "Who is the company executive, born on an island in Asia, who famously worked at Denny's before launching their own company that became one of the highest valued companies in the 2020s?"}]
+response = agent(messages)
+print(response['response_text'])
+```
+Check out the [Slim class](src/slim/slim.py) for more details on the configuration options.
+See below for setting up the environment and the keys.
+
 
 ## Setup
 
 ### Environment
+
+First, clone the repository:
+```bash
+git clone --recursive https://github.com/howard-yen/SLIM.git
+cd SLIM
+```
 
 We recommend using [uv](https://docs.astral.sh/uv/) for managing dependencies.
 The following command will use the `pyproject.toml` to install the dependencies:
@@ -36,6 +60,26 @@ uv sync
 ```
 
 This will install the dependencies in the `.venv` directory. You can activate the virtual environment with `source .venv/bin/activate`, but we recommend simply using `uv run ...` to run the commands (detailed below).
+
+Alternatively, if you prefer using pip, you may reference the following instructions.
+
+<details>
+<summary>Install with pip</summary>
+
+First, create and activate a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+Then install the package in editable mode:
+```bash
+pip install -e .
+```
+
+This will read the `pyproject.toml` and install all required dependencies.
+</details>
+
 
 ### API Keys
 
@@ -68,10 +112,16 @@ uv run tools/serve_search.py --port 8006 # make sure the port matches the one us
 
 Then, you can run the evaluation with:
 ```bash
-uv run 
+model=slim-o3-100; uv run simple-evals.simple_evals --eval browsecomp,hle_text --model $model --output-dir simple-evals/outputs/${model} --n-threads 8 --tag "v2" --examples 300 --model_seed 0 --checkpoint-interval 5
+```
+You can checkout the [script](simple-evals/simple_evals.py) for more details on the arguments.
+
+Or, simply with:
+```bash
+bash scripts/run_eval.sh
 ```
 
-## Data
+<!-- ## Data -->
 
 
 

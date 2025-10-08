@@ -73,8 +73,8 @@ class Slim:
         self, 
         model: str, 
         system_message: str | None = None,
-        max_iterations: int=10,
-        max_tokens: int=1024,
+        max_iterations: int=100,
+        max_tokens: int=32768,
         temperature: float=1.0,
         topk: int=10,
         content_length: int=10000,
@@ -88,9 +88,10 @@ class Slim:
         self.model = model
         if use_summary_system_message:
             self.system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE
+        elif system_message is None:
+            self.system_message = SLIM_SYSTEM_MESSAGE
         else:
             self.system_message = system_message
-        assert self.system_message, "System message is required for SlimSampler"
         self.max_iterations = max_iterations
         self.max_tokens = max_tokens
         self.temperature = temperature

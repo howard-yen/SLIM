@@ -18,7 +18,10 @@ dependencies = [
     "fastapi",
     "rouge-score",
     "diskcache",
-    "crawl4ai"
+    "crawl4ai",
+    "pandas",
+    "blobfile",
+    "datasets",
 ]
 
 [tool.setuptools.packages.find]
