@@ -4,7 +4,7 @@
 
 
 <p align="center">
-    <a href="https://arxiv.org/abs/2410.02694" target="_blank" rel="noopener noreferrer">
+    <a href="https://arxiv.org/abs/2510.18939" target="_blank" rel="noopener noreferrer">
         <img alt="paper" src="https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B">
     </a>
     <!-- <a href="https://princeton-nlp.github.io/HELMET/" target="_blank" rel="noopener noreferrer">
@@ -19,10 +19,8 @@ You can find the evaluation code details here.
 
 - [Quick Start](#quick-start)
 - [Setup](#setup)
-<!-- - [Data](#data) -->
 - [Running evaluation](#running-evaluation)
 - [Running analysis](#running-analysis)
-<!-- - [Others](#others) -->
 - [Contacts](#contacts)
 - [Citation](#citation)
 
