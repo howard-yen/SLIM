@@ -1,0 +1,3 @@
+[submodule "simple-evals"]
+	path = simple-evals
+	url = https://github.com/howard-yen/simple-evals.git
