@@ -120,7 +120,7 @@ Then, you can run the evaluation with:
 ```bash
 model=slim-o3-100; uv run simple-evals.simple_evals --eval browsecomp,hle_text --model $model --output-dir simple-evals/outputs/${model} --n-threads 8 --tag "v2" --examples 300 --model_seed 0 --checkpoint-interval 5
 ```
-You can checkout the [script](simple-evals/simple_evals.py) for more details on the arguments.
+You can check out the script under `simple-evals/simple_evals.py` for more details on the arguments.
 
 Or, simply with:
 ```bash
@@ -165,9 +165,13 @@ If you encounter any problems, you can also open an issue here. Please try to sp
 If you find our work useful, please cite us:
 ```
 @misc{yen2025slim,
-      title={Lost in the Maze: Overcoming Context Limitations in Agentic Search}, 
+      title={Lost in the Maze: Overcoming Context Limitations in Long-Horizon Agentic Search}, 
       author={Howard Yen and Ashwin Paranjape and Mengzhou Xia and Thejas Venkatesh and Jack Hessel and Danqi Chen and Yuhao Zhang},
       year={2025},
+      eprint={2510.18939},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2510.18939},
 }
 ```
 
