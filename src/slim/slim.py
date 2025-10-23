@@ -13,6 +13,11 @@ import litellm
 from .tools.search_utils import WebSearchTool, SEARCH_TOOL, VISIT_TOOL
 
 
+SLIM_SYSTEM_MESSAGE = """You are a helpful assistant that can search the web. You are encourage to use the search tool to best answer the user's question. Use the search tool to collect useful information.
+When using the search tool, you should think carefully about the question. Decompose and rewrite the search query if necessary. After using the search tool, you should reason about the results and summarize the relevant information to answer the user's question. If the search results are not relevant, you are encouraged to refine your search query and search again. Continue to use the tools until you have collected all the information you need, this may take many iterations.
+The search tool will return a list of urls and their descriptions, and you should visit the urls that are relevant to the task. Visiting a url will provide you with more information.
+After you have collected all the information you need, you should complete the given task."""
+
 SLIM_SUMMARIZED_SYSTEM_MESSAGE = """You are a helpful assistant that can search the web. You are encourage to use the search tool to best answer the user's question. Use the search tool to collect useful information.
 When using the search tool, you should think carefully about the question. Decompose and rewrite the search query if necessary. After using the search tool, you should reason about the results and summarize the relevant information to answer the user's question. If the search results are not relevant, you are encouraged to refine your search query and search again. Continue to use the tools until you have collected all the information you need, this may take many iterations.
 The search tool will return a list of urls and their descriptions, and you should visit the urls that are relevant to the task. Visiting a url will provide you with more information.
@@ -83,6 +88,7 @@ class Slim:
         summary_interval: int=50,
         summary_mode: str="turn",
         use_summary_system_message: bool=False,
+        tool_port: int=8006,
         extra_kwargs: Dict[str, Any]={},
     ):
         self.model = model
@@ -100,7 +106,7 @@ class Slim:
         assert self.summary_mode in ["turn", "token", "none"], "Summary mode must be either turn or token or none"
         self.all_summaries = []
         self.extra_kwargs = extra_kwargs
-        self.web_search_tool = WebSearchTool()
+        self.web_search_tool = WebSearchTool(port=tool_port)
         self.topk = topk
         self.content_length = content_length
         self.scoring_func = scoring_func

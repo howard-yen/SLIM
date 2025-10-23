@@ -13,7 +13,7 @@ dependencies = [
     "bm25s",
     "jax[cpu]",
     "PyStemmer",
-    "gpt-researcher",
+    "gpt-researcher==0.14.2",
     "uvicorn",
     "fastapi",
     "rouge-score",
@@ -22,6 +22,7 @@ dependencies = [
     "pandas",
     "blobfile",
     "datasets",
+    "transformers"
 ]
 
 [tool.setuptools.packages.find]
@@ -30,4 +31,3 @@ where = ["src"]
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-

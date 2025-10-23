@@ -15,20 +15,20 @@
 This repository contains the implementation of SLIM (Simple Lightweight Information Management), a powerful framework for long-horizon search agents. 
 You can find the evaluation code details here.
 
-
 ## Quick Links
 
 - [Quick Start](#quick-start)
 - [Setup](#setup)
-- [Data](#data)
+<!-- - [Data](#data) -->
 - [Running evaluation](#running-evaluation)
-- [Others](#others)
+- [Running analysis](#running-analysis)
+<!-- - [Others](#others) -->
 - [Contacts](#contacts)
 - [Citation](#citation)
 
 ## Quick Start
 
-After setting up the environment and the keys, you can use easily import SILM and use it like so:
+After setting up the environment and serving the search engine, you can easily import SLIM and use it like so:
 ```python
 from slim import Slim
 
@@ -105,9 +105,17 @@ We use [LiteLLM](https://github.com/BerriAI/litellm) to query model endpoints, s
 
 ## Running evaluation
 
+> [!NOTE] 
+> Due to the randomness and ever-changing nature of LLMs, search engine, and website scraping, the results may vary slightly from the numbers reported in the paper.
+
+
+Our evaluation is based on the [simple-evals](https://github.com/openai/simple-evals) framework.
+This repo uses a modified version of simple-evals with custom samplers and other quality-of-life improvements (e.g., saving intermediate results, etc.).
+You can check out the [repo](https://github.com/howard-yen/simple-evals) for more details.
+
 For some settings (`react`, `search-o1`, and `slim`), you must set up the retrieval server first with
 ```bash
-uv run tools/serve_search.py --port 8006 # make sure the port matches the one used by the model.
+uv run src/slim/tools/serve_search.py --port 8006 # make sure the port matches the one used by the model.
 ```
 
 Then, you can run the evaluation with:
@@ -121,9 +129,33 @@ Or, simply with:
 bash scripts/run_eval.sh
 ```
 
-<!-- ## Data -->
+<details>
+<summary>HuggingFace Open Deep Research Set Up</summary>
+
+To run the baseline HF-ODR, you should follow the instructions [here](https://github.com/huggingface/smolagents/tree/main/examples/open_deep_research).
+For our experiments, we use the repo at commit `155814f2150d52bee46c3c1a47db34bf96078707`.
+To replicate our numbers, we recommend using the same version.
+
+Note that running HF ODR can be slow in our experience, so expect long runtime for these experiments.
+</details>
+
+<details>
+<summary>GPT Researcher Set Up</summary>
+
+For GPT Researcher, you need to modify the repository in order to log the token usage correctly.
+More coming on this soon!
+
+</details>
 
 
+
+## Running analysis
+
+To run our analysis pipeline on the results. You can use the command:
+```bash
+uv run scripts/analyze.py --path {path to the allresults.json file}
+```
+This will produce a file in the same directory with the `allresults_analyzed.json` suffix.
 
 ## Contacts
 
@@ -167,3 +199,5 @@ Please also cite the original dataset creators, listed below:
       url={https://arxiv.org/abs/2501.14249}, 
 }
 ```
+
+</details>
