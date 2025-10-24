@@ -12,7 +12,7 @@
     </a> -->
 </p>
 
-This repository contains the implementation of SLIM (Simple Lightweight Information Management), a powerful framework for long-horizon search agents. 
+This repository contains the implementation of SLIM (Simple Lightweight Information Management), a simple yet powerful framework for long-horizon search agents. 
 You can find the evaluation code details here.
 
 ## Quick Links
@@ -104,7 +104,7 @@ We use [LiteLLM](https://github.com/BerriAI/litellm) to query model endpoints, s
 ## Running evaluation
 
 > [!NOTE] 
-> Due to the randomness and ever-changing nature of LLMs, search engine, and website scraping, the results may vary slightly from the numbers reported in the paper.
+> Due to the randomness and ever-changing nature of LLMs, search engine, and website scraping, the results may vary slightly from the numbers reported in the paper. You may find all of our result files [here](https://drive.google.com/file/d/1J2gTYCKgD0MKlSMOMzLr80VaRJyhx_4-/view?usp=sharing).
 
 
 Our evaluation is based on the [simple-evals](https://github.com/openai/simple-evals) framework.
