@@ -7,21 +7,38 @@ import copy
 import random
 import requests
 import asyncio
-
+from dataclasses import dataclass
 import litellm
 
-from .tools.search_utils import WebSearchTool, SEARCH_TOOL, VISIT_TOOL
+from .tools.search_utils import WebSearchTool, SEARCH_TOOL, VISIT_TOOL, SEARCH_RESPONSE_TOOL, VISIT_RESPONSE_TOOL, VISIT_TOOL_NO_QUERY, VISIT_RESPONSE_TOOL_NO_QUERY
 
+
+Message = dict[str, Any]  # keys role, content
+MessageList = list[Message]
+
+@dataclass
+class SamplerResponse:
+    """
+    Response from the Slim sampler.
+    """
+    response_text: str
+    actual_queried_message_list: MessageList
+    response_metadata: dict[str, Any]
 
 SLIM_SYSTEM_MESSAGE = """You are a helpful assistant that can search the web. You are encourage to use the search tool to best answer the user's question. Use the search tool to collect useful information.
 When using the search tool, you should think carefully about the question. Decompose and rewrite the search query if necessary. After using the search tool, you should reason about the results and summarize the relevant information to answer the user's question. If the search results are not relevant, you are encouraged to refine your search query and search again. Continue to use the tools until you have collected all the information you need, this may take many iterations.
 The search tool will return a list of urls and their descriptions, and you should visit the urls that are relevant to the task. Visiting a url will provide you with more information.
 After you have collected all the information you need, you should complete the given task."""
 
-SLIM_SUMMARIZED_SYSTEM_MESSAGE = """You are a helpful assistant that can search the web. You are encourage to use the search tool to best answer the user's question. Use the search tool to collect useful information.
+SLIM_SYSTEM_MESSAGE_NO_VISIT = """You are a helpful assistant that can search the web. You are encourage to use the search tool to best answer the user's question. Use the search tool to collect useful information.
 When using the search tool, you should think carefully about the question. Decompose and rewrite the search query if necessary. After using the search tool, you should reason about the results and summarize the relevant information to answer the user's question. If the search results are not relevant, you are encouraged to refine your search query and search again. Continue to use the tools until you have collected all the information you need, this may take many iterations.
-The search tool will return a list of urls and their descriptions, and you should visit the urls that are relevant to the task. Visiting a url will provide you with more information.
-After you have collected all the information you need, you should complete the given task.
+The search tool will return a list of urls and their descriptions.
+After you have collected all the information you need, you should complete the given task."""
+
+SLIM_SUMMARIZED_SYSTEM_MESSAGE = SLIM_SYSTEM_MESSAGE + """
+You are given a summary of work done so far, which contains relevant information to the task. You should use this summary to continue the completion of the task."""
+
+SLIM_SUMMARIZED_SYSTEM_MESSAGE_NO_VISIT = SLIM_SYSTEM_MESSAGE_NO_VISIT + """
 You are given a summary of work done so far, which contains relevant information to the task. You should use this summary to continue the completion of the task."""
 
 
@@ -78,6 +95,7 @@ class Slim:
         self, 
         model: str, 
         system_message: str | None = None,
+        summary_system_message: str | None = None,
         max_iterations: int=100,
         max_tokens: int=32768,
         temperature: float=1.0,
@@ -88,16 +106,45 @@ class Slim:
         summary_interval: int=50,
         summary_mode: str="turn",
         use_summary_system_message: bool=False,
+        use_responses_api: bool=False,
+        keep_reasoning: bool=False,
+        search_tool: dict | None = None,
+        visit_tool: dict | None = None,
+        no_visit_tool: bool=False,
+        no_query_in_visit: bool=False,
+        base_url: str | None = None,
         tool_port: int=8006,
         extra_kwargs: Dict[str, Any]={},
     ):
         self.model = model
+
         if use_summary_system_message:
             self.system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE
-        elif system_message is None:
-            self.system_message = SLIM_SYSTEM_MESSAGE
+        elif no_visit_tool:
+            self.system_message = SLIM_SYSTEM_MESSAGE_NO_VISIT
         else:
-            self.system_message = system_message
+            self.system_message = system_message if system_message is not None else SLIM_SYSTEM_MESSAGE
+
+        if summary_system_message is not None:
+            self.summary_system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE
+        elif no_visit_tool:
+            self.summary_system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE_NO_VISIT
+        else:
+            self.summary_system_message = summary_system_message
+        
+        if search_tool is None:
+            self.search_tool = SEARCH_TOOL if not use_responses_api else SEARCH_RESPONSE_TOOL
+        else:
+            self.search_tool = search_tool
+        if visit_tool is None:
+            if no_query_in_visit:
+                self.visit_tool = VISIT_TOOL_NO_QUERY if not use_responses_api else VISIT_RESPONSE_TOOL_NO_QUERY
+            else:
+                self.visit_tool = VISIT_TOOL if not use_responses_api else VISIT_RESPONSE_TOOL
+        else:
+            self.visit_tool = visit_tool
+        self.tools = [self.search_tool, self.visit_tool] if not no_visit_tool else [self.search_tool]
+
         self.max_iterations = max_iterations
         self.max_tokens = max_tokens
         self.temperature = temperature
@@ -111,6 +158,7 @@ class Slim:
         self.content_length = content_length
         self.scoring_func = scoring_func
         self.chunking_func = chunking_func
+        self.base_url = base_url
 
 
     def _pack_message(self, role, content):
@@ -118,6 +166,7 @@ class Slim:
 
 
     def generate(self, message_list: List[Dict[str, Any]], **kwargs):
+        # TODO: add summarize as a tool
         trial = 0
         while True:
             try:
@@ -128,6 +177,7 @@ class Slim:
                     max_tokens=self.max_tokens,
                     temperature=self.temperature,
                     timeout=7200,
+                    base_url=self.base_url,
                     **kwargs
                 )
                 message = response['choices'][0]['message']
@@ -200,7 +250,7 @@ class Slim:
             if cur_iter == self.max_iterations:
                 response = self.generate(message_list)
             else:
-                response = self.generate(message_list, tools=[SEARCH_TOOL, VISIT_TOOL])
+                response = self.generate(message_list, tools=self.tools)
             
             if isinstance(response, str):
                 print(f"Error in iteration {cur_iter}. Falling back to not using tools.")
@@ -277,7 +327,7 @@ class Slim:
                         f'Step {i+1}: {summary}' for i, summary in enumerate(self.all_summaries)
                     ])
                     message_list = copy.deepcopy(original_message_list)
-                    message_list[0]['content'] = SLIM_SUMMARIZED_SYSTEM_MESSAGE
+                    message_list[0]['content'] = self.summary_system_message
                     message_list.append(self._pack_message("user", summary_text))
                     extra_convo.append(self._pack_message("user", summary_text))
 
@@ -293,9 +343,9 @@ class Slim:
         }
         message = response['choices'][0]['message']
         response_text = message['content'] if message['content'] is not None else ""
-        return {
-            "response_text": response_text,
-            "response_metadata": metadata,
-            "actual_queried_message_list": original_message_list,
-        }
+        return SamplerResponse(
+            response_text=response_text,
+            actual_queried_message_list=original_message_list,
+            response_metadata=metadata,
+        )
         

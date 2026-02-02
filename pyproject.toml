@@ -22,7 +22,9 @@ dependencies = [
     "pandas",
     "blobfile",
     "datasets",
-    "transformers"
+    "transformers",
+    "vllm>=0.11.0",
+    "tabulate",
 ]
 
 [tool.setuptools.packages.find]
