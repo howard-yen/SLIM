@@ -25,6 +25,7 @@ dependencies = [
     "transformers",
     "vllm>=0.11.0",
     "tabulate",
+    "pdfplumber>=0.11.9",
 ]
 
 [tool.setuptools.packages.find]
