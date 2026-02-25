@@ -28,6 +28,15 @@ HEADERS = {
 }
 scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
 cache = Cache("./cache")
+USE_DISKCACHE = False
+
+def diskcache_memoize(**kwargs):
+    """Conditionally apply diskcache memoize based on USE_DISKCACHE flag."""
+    def decorator(func):
+        if USE_DISKCACHE:
+            return cache.memoize(**kwargs)(func)
+        return func
+    return decorator
 
 class SearchRequest(BaseModel):
     query: str
@@ -139,7 +148,7 @@ INITIAL_RETRY_DELAY = 0.2
 
 
 @lru_cache(maxsize=8192)
-@cache.memoize(typed=True, expire=1e7, tag="serper")
+@diskcache_memoize(typed=True, expire=1e7, tag="serper")
 def serper_search(query: str, topk: int = 10) -> List[Dict]:
     url = "https://google.serper.dev/search"
     headers = {"X-API-KEY": os.environ["SERPER_API_KEY"], 'Content-Type': 'application/json'}
@@ -216,7 +225,7 @@ def _cached_search_o1(query: str, topk: int = 10) -> List[Dict]:
 
 
 @lru_cache(maxsize=8192)
-@cache.memoize(typed=True, expire=1e7, tag="content")
+@diskcache_memoize(typed=True, expire=1e7, tag="content")
 def _cached_get_content(url: str, content_length: int = 10000) -> Tuple[bool, str, str]:
     """Cached function to get raw content from URL."""
     try:
@@ -231,7 +240,7 @@ def _cached_get_content(url: str, content_length: int = 10000) -> Tuple[bool, st
 
 
 @lru_cache(maxsize=8192)
-@cache.memoize(typed=True, expire=1e7, tag="snippet")
+@diskcache_memoize(typed=True, expire=1e7, tag="snippet")
 def _cached_find_snippet(content: str, query: str, num_characters: int = 10000, scoring_func: str = "rouge", chunking_func: str = "newline") -> str:
     """Cached function to find snippet in content."""
     if not query:
@@ -351,7 +360,11 @@ def search_o1_search(request: SearchRequest):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8006)
+    parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
     assert os.environ["SERPER_API_KEY"] is not None, "SERPER_API_KEY is not set"
 
-    uvicorn.run(app, host="0.0.0.0", port=args.port)
+    if args.workers > 1:
+        uvicorn.run("slim.tools.serve_search:app", host="0.0.0.0", port=args.port, workers=args.workers)
+    else:
+        uvicorn.run(app, host="0.0.0.0", port=args.port)
