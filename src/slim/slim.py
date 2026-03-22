@@ -126,11 +126,11 @@ class Slim:
             self.system_message = system_message if system_message is not None else SLIM_SYSTEM_MESSAGE
 
         if summary_system_message is not None:
-            self.summary_system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE
+            self.summary_system_message = summary_system_message
         elif no_visit_tool:
             self.summary_system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE_NO_VISIT
         else:
-            self.summary_system_message = summary_system_message
+            self.summary_system_message = SLIM_SUMMARIZED_SYSTEM_MESSAGE
         
         if search_tool is None:
             self.search_tool = SEARCH_TOOL if not use_responses_api else SEARCH_RESPONSE_TOOL
@@ -151,7 +151,6 @@ class Slim:
         self.summary_interval = summary_interval
         self.summary_mode = summary_mode
         assert self.summary_mode in ["turn", "token", "none"], "Summary mode must be either turn or token or none"
-        self.all_summaries = []
         self.extra_kwargs = extra_kwargs
         self.web_search_tool = WebSearchTool(port=tool_port)
         self.topk = topk
@@ -237,6 +236,7 @@ class Slim:
         all_usages = []
         summ_usages = []
         agent_usages = []
+        all_summaries = []
         tool_counts = defaultdict(int)
         fallback = False
         message_list = [
@@ -322,9 +322,9 @@ class Slim:
                     summ_usages.append(get_usage_dict(response.usage))
                     all_usages.append(summ_usages[-1])
 
-                    self.all_summaries.append(response.choices[0].message.content)
+                    all_summaries.append(response.choices[0].message.content)
                     summary_text = "Summary of the work done so far:\n\n" +  "\n".join([
-                        f'Step {i+1}: {summary}' for i, summary in enumerate(self.all_summaries)
+                        f'Step {i+1}: {summary}' for i, summary in enumerate(all_summaries)
                     ])
                     message_list = copy.deepcopy(original_message_list)
                     message_list[0]['content'] = self.summary_system_message
