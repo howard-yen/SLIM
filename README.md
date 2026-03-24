@@ -57,6 +57,8 @@ The following command will use the `pyproject.toml` to install the dependencies:
 uv sync
 # additional setup for web scraping 
 uv run python -m playwright install --with-deps chromium
+# check if scraping is installed correctly 
+uv run crawl4ai-doctor
 ```
 
 This will install the dependencies in the `.venv` directory. You can activate the virtual environment with `source .venv/bin/activate`, but we recommend simply using `uv run ...` to run the commands (detailed below).

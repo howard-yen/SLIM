@@ -105,7 +105,7 @@ class WebSearchTool():
             return json.dumps({"error": "Please provide a query to search for."})
 
         payload = json.dumps({"query": query, "topk": topk})
-        response = requests.post(self.url + "/search", data=payload)
+        response = requests.post(self.url + "/search", data=payload, headers={"Content-Type": "application/json"})
         return response.json()['output']
 
 
@@ -116,7 +116,7 @@ class WebSearchTool():
         # use threadmap and call the /search endpoint for each query
         def search_wrapper(query: str) -> dict:
             payload = json.dumps({"query": query, "topk": topk})
-            response = requests.post(self.url + "/search", data=payload)
+            response = requests.post(self.url + "/search", data=payload, headers={"Content-Type": "application/json"})
             output = response.json()['output']
             return {
                 "query": query,
@@ -133,7 +133,7 @@ class WebSearchTool():
 
         payload = {"url": url, "query": query, "content_length": content_length, "scoring_func": scoring_func, "chunking_func": chunking_func}
         payload = json.dumps(payload)
-        response = requests.post(self.url + "/open_url", data=payload)
+        response = requests.post(self.url + "/open_url", data=payload, headers={"Content-Type": "application/json"})
         try: 
             out = response.json()
             return out['output']
@@ -158,7 +158,7 @@ class WebSearchTool():
         def browse_wrapper(url: str, query: str) -> dict:
             payload = {"url": url, "query": query, "content_length": content_length, "scoring_func": scoring_func, "chunking_func": chunking_func}
             payload = json.dumps(payload)
-            response = requests.post(self.url + "/open_url", data=payload)
+            response = requests.post(self.url + "/open_url", data=payload, headers={"Content-Type": "application/json"})
             output = response.json()['output']
             return {
                 "url": url,
@@ -175,7 +175,7 @@ class WebSearchTool():
             return "Search error: Please provide a query to search for."
 
         payload = json.dumps({"query": query, "topk": topk, "content_length": content_length})
-        response = requests.post(self.url + "/search_open_url", data=payload)
+        response = requests.post(self.url + "/search_open_url", data=payload, headers={"Content-Type": "application/json"})
         return response.json()['output']
 
     def search_o1(self, query: str, topk: int = 10) -> str:
@@ -184,7 +184,7 @@ class WebSearchTool():
             return json.dumps({"output": "Search error: Please provide a query to search for.", "search_results": []})
 
         payload = json.dumps({"query": query, "topk": topk})
-        response = requests.post(self.url + "/search_o1", data=payload)
+        response = requests.post(self.url + "/search_o1", data=payload, headers={"Content-Type": "application/json"})
         try:
             out = response.json()
             return out

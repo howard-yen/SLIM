@@ -28,7 +28,7 @@ HEADERS = {
 }
 scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
 cache = Cache("./cache")
-USE_DISKCACHE = False
+USE_DISKCACHE = True
 
 def diskcache_memoize(**kwargs):
     """Conditionally apply diskcache memoize based on USE_DISKCACHE flag."""

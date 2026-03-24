@@ -275,7 +275,15 @@ class Slim:
             if tool_calls:
                 message_list.append(message)
                 for tool_call in tool_calls:
-                    function_args = json.loads(tool_call.function.arguments)
+                    try:
+                        function_args = json.loads(tool_call.function.arguments)
+                    except Exception as e:
+                        tool_response = f"Error: Invalid JSON in tool call: \n{tool_call.function.arguments}"
+                        extra_convo.append(self._pack_message(f"tool_call {tool_call.function.name}", tool_call.function.arguments))
+                        message_list.append({'tool_call_id': tool_call.id, 'role': 'tool', 'name': tool_call.function.name, 'content': tool_response})
+                        extra_convo.append(self._pack_message("tool", tool_response))
+                        continue
+
                     print(f"Function args: {function_args}")
                     tool_counts[tool_call.function.name] += 1
 
